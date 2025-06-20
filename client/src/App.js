@@ -1,33 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 
-const App = () => {
+function App() {
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchPosts = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get('/api/posts');
-        setPosts(response.data);
+        const response = await fetch('http://localhost:8080/posts');
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        setPosts(data);
       } catch (error) {
-        console.error("Error fetching posts:", error);
+        setError(error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchPosts();
+    fetchData();
   }, []);
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
   return (
-    <div>
-      <h1>Blog Posts</h1>
+    <ul>
       {posts.map(post => (
-        <div key={post.id}>
-          <h2>{post.title}</h2>
+        <li key={post.id}>
+          <h3>{post.title}</h3>
           <p>{post.content}</p>
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   );
-};
+}
 
 export default App;
