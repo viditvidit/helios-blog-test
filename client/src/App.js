@@ -1,24 +1,32 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import Navbar from './components/Navbar';
-import Breadcrumbs from './components/Breadcrumbs';
-import HomePage from './pages/HomePage';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const App = () => {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await axios.get('/api/posts');
+        setPosts(response.data);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
   return (
-    <Router>
-      <div className="App">
-        <Sidebar />
-        <div className="main-content">
-          <Navbar />
-          <Breadcrumbs />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-          </Routes>
+    <div>
+      <h1>Blog Posts</h1>
+      {posts.map(post => (
+        <div key={post.id}>
+          <h2>{post.title}</h2>
+          <p>{post.content}</p>
         </div>
-      </div>
-    </Router>
+      ))}
+    </div>
   );
 };
 
